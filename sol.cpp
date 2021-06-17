@@ -16,11 +16,14 @@ class Block{
     int weight,fee;
     vector<string> parents;
     int no_of_parents;
+    bool visited;
 
-    Block() {}
+    Block() {
+        this->visited = false;
+    }
 
     Block(string tx_id, string feeString, string weightString, string parentString){ // Constructor to initialise values to Block
-        //this->is_Visited = true;
+        this->visited = true;
         this->tx_id = tx_id;
         int weight = stoi(weightString);
         int fee = stoi(feeString);
@@ -37,11 +40,12 @@ class Block{
         }
     }
 };    
+
 int main(){
-    ifstream myFileStream("mempool.csv");
+    ifstream myFileStream("mempool2.csv");
     if(!myFileStream.is_open()){
-        cout << "Sorry! Could not open the file" << endl;
-        return 0;
+        cerr << "Sorry! Could not open the file" << endl;
+        exit(1);
     }
     vector<Block> allblocks;
     string line;
@@ -51,7 +55,7 @@ int main(){
         stringstream ss(line);
         getline(ss, tx_id, ',');
         if(tx_id == "tx_id"){
-            continue; // Heading
+            continue; // Not including Heading
         }
         getline(ss, feeString, ',');
         getline(ss, weightString, ',');
@@ -79,6 +83,7 @@ int main(){
         }
         outdata << endl;
     }
+    cout << "Operation Performed Successfully\n";
     outdata.close();
     myFileStream.close();
 
