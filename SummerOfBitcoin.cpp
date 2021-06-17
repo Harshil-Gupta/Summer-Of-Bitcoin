@@ -145,8 +145,10 @@ int main(){
     long long curr_fees = 0;
 
     vector<Block> outputBlocks;
+    int i;
+    unordered_map<int, int> temp_mp; // In next iteration, we will skip the blocks that have already been included
 
-    for(int i=0;i<allblocks.size() && curr_weight<allowed_weight;i++){
+    for(i=0;i<allblocks.size() && curr_weight<allowed_weight;i++){
         if(allblocks[i].isValid == false){
             continue;
         }
@@ -154,6 +156,7 @@ int main(){
         last_weight = allblocks[i].weight;
         curr_weight+=allblocks[i].weight;
         curr_fees += allblocks[i].fee;
+        temp_mp[allblocks[i].block_id]++;
         outputBlocks.push_back(allblocks[i]);
     }
 
@@ -164,14 +167,43 @@ int main(){
         removelast = true;
     }
 
+    // Sorting all blocks in increasing order of weight
+    sort(allblocks.begin(), allblocks.end(), 
+        [] (const Block& block1, const Block& block2)
+        {
+            return block1.weight < block2.weight;
+        }
+    );
+
+    // Blocks are in increasing order sorted by weight, we add those blocks 
+    // whose addition of weight in total weight wont exceed the limit.
+    for(int j=0; j<allblocks.size() && curr_weight<allowed_weight;j++){
+        if(allblocks[j].isValid == false || temp_mp[allblocks[j].block_id] > 0){
+            // If we have included a block in output vector, we skip it
+            continue;
+        }
+        last_fee = allblocks[j].fee;
+        last_weight = allblocks[j].weight;
+        curr_weight+=allblocks[j].weight;
+        curr_fees += allblocks[j].fee;
+        outputBlocks.push_back(allblocks[j]);
+    }
+
+    removelast = false;
+    if(curr_weight>allowed_weight){
+        curr_weight-= last_weight;
+        curr_fees -=  last_fee;
+        removelast = true;
+    }
+
     // Sorting all blocks in order of their appearance in mempool.csv
+
     sort(allblocks.begin(), allblocks.end(), 
         [] (const Block& block1, const Block& block2)
         {
             return block1.block_id < block2.block_id;
         }
     );
-
     int n = outputBlocks.size();
     if(removelast == true){
         n = outputBlocks.size()-1; // So that last block will not be included
@@ -184,7 +216,7 @@ int main(){
       exit(1);
     }
     for(int i=0;i<n;i++){
-        outdata << allblocks[i].tx_id << endl;
+        outdata << allblocks[i].tx_id << endl; // Storing data in block.txt
     }
     cout << "Operation Performed Successfully\n";
     cout << "Total weight of valid blocks: "<< curr_weight << "\n";
