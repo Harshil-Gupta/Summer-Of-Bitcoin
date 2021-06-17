@@ -163,12 +163,41 @@ int main(){
         curr_fees += allblocks[i].fee;
         outdata << "ID" << i+1 << ": " << allblocks[i].tx_id << " Fee: " << allblocks[i].fee << " Weight: " << allblocks[i].weight;
         outdata << " Parents: " << allblocks[i].no_of_parents << " ";
-        outdata << "Weight per fee: " << allblocks[i].weightperfee << "\n";
+        int temp = allblocks[i].no_of_parents;
+        int k=0;
+        while(temp--){
+            outdata << allblocks[i].parents[k] << " ";
+            k++;
+        }
+        outdata << endl;
     }
+    bool removelast = false;
     if(curr_weight>allowed_weight){
         curr_weight-= last_weight;
         curr_fees -=  last_fee;
+        removelast = true;
     }
+
+    if(removelast == true){
+        string line; 
+        vector<string> lines;
+        std::ifstream inputStream("sampleoutput.txt");
+
+        while (getline(inputStream,line)) {
+            lines.push_back(line);
+        }
+        inputStream.close();
+
+        std::fstream outputStream("output.txt", ios::out | ios::trunc);
+        if (outputStream.is_open())
+        {
+            for (int i=0; i < lines.size()-1; i++) {
+                outputStream << lines[i] << "\n";
+            }
+        outputStream.close();
+        }
+    }
+
     cout << "Total weight of valid blocks: "<< curr_weight << "\n";
     cout << "Total fee profit possible: " << curr_fees << "\n";
     cout << "Operation Performed Successfully\n";
