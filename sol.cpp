@@ -164,21 +164,13 @@ int main(){
         n = outputBlocks.size()-1;
     }
     ofstream outdata; 
-    outdata.open("output.txt"); 
+    outdata.open("block.txt"); 
     if(!outdata) {
       cerr << "Sorry! Could not open the output file" << endl;
       exit(1);
     }
     for(int i=0;i<n;i++){
-    outdata << "ID" << i+1 << ": " << allblocks[i].tx_id << " Fee: " << allblocks[i].fee << " Weight: " << allblocks[i].weight;
-        outdata << " Parents: " << allblocks[i].no_of_parents << " ";
-        int temp = allblocks[i].no_of_parents;
-        int k=0;
-        while(temp--){
-            outdata << allblocks[i].parents[k] << " ";
-            k++;
-        }
-        outdata << endl;
+        outdata << allblocks[i].tx_id << endl;
     }
     cout << "Operation Performed Successfully\n";
     cout << "Total weight of valid blocks: "<< curr_weight << "\n";
