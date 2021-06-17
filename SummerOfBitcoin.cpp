@@ -8,7 +8,6 @@
 #include<unordered_map>
 using namespace std;
 
-// The file to be reviewed for Summer of Bitcoin is summerofbitcoin.cpp
 // Code Written By: Harshil Gupta
 // https://github.com/Harshil-Gupta/Summer-Of-Bitcoin
 
@@ -22,16 +21,17 @@ class Block{
     int no_of_parents;
     bool visited;
     bool isValid;
-    int no;
-    double weightperfee;
+    int block_id;
+    double weightperfee; // weightperfee = weight of block divided by fee of block
 
     Block() {
         this->visited = false;
         this->isValid = true;
     }
 
-    Block(string tx_id, string feeString, string weightString, string parentString){ 
+    Block(string tx_id, string feeString, string weightString, string parentString, int block_id){ 
         // Constructor to initialise values to Block
+        this->block_id = block_id;
         this->visited = true;
         this->tx_id = tx_id;
         int weight = stoi(weightString);
@@ -70,6 +70,7 @@ int main(){
     }
     vector<Block> allblocks;
     string line;
+    int block_id = 0;
     while(getline(myFileStream, line)){
         string tx_id, parentString, feeString, weightString;
         
@@ -86,8 +87,9 @@ int main(){
         mp[tx_id]++;
         if(parentString.length()>0)
             mp[parentString]++;
-        Block new_block(tx_id,feeString,weightString,parentString);
+        Block new_block(tx_id,feeString,weightString,parentString,block_id);
         allblocks.push_back(new_block); 
+        block_id++;
     }
     myFileStream.close();
     int no_of_valid_blocks = 0;
@@ -126,9 +128,10 @@ int main(){
 
         if(allblocks[i].isValid == true){
             no_of_valid_blocks++;
-            allblocks[i].no = i+1;
         }
     }
+    // Sorting all valid blocks in increasing value of weight per fee
+    // This sorts the blocks as per most profitable block with least weight
     sort(allblocks.begin(), allblocks.end(), 
         [] (const Block& block1, const Block& block2)
         {
@@ -160,10 +163,20 @@ int main(){
         curr_fees -=  last_fee;
         removelast = true;
     }
+
+    // Sorting all blocks in order of their appearance in mempool.csv
+    sort(allblocks.begin(), allblocks.end(), 
+        [] (const Block& block1, const Block& block2)
+        {
+            return block1.block_id < block2.block_id;
+        }
+    );
+
     int n = outputBlocks.size();
     if(removelast == true){
-        n = outputBlocks.size()-1;
+        n = outputBlocks.size()-1; // So that last block will not be included
     }
+
     ofstream outdata; 
     outdata.open("block.txt"); 
     if(!outdata) {
