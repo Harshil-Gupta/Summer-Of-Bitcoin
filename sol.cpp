@@ -8,6 +8,7 @@
 #include<unordered_map>
 using namespace std;
 
+// The file to be reviewed for Summer of Bitcoin is summerofbitcoin.cpp
 // Code Written By: Harshil Gupta
 // https://github.com/Harshil-Gupta/Summer-Of-Bitcoin
 
