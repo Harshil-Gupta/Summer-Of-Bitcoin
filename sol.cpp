@@ -21,6 +21,7 @@ class Block{
     int no_of_parents;
     bool visited;
     bool isValid;
+    int no;
     double weightperfee;
 
     Block() {
@@ -60,10 +61,10 @@ bool checkParents(string id){
 
 int main(){
     // Total Blocks in mempool.csv => 5214
-    // Total Valid Blocks in mempool.csv => 
+    // Total Valid Blocks in mempool.csv => 5202
     ifstream myFileStream("mempool.csv");
     if(!myFileStream.is_open()){
-        cerr << "Sorry! Could not open the file" << endl;
+        cerr << "Sorry! Could not open the input file" << endl;
         exit(1);
     }
     vector<Block> allblocks;
@@ -87,13 +88,8 @@ int main(){
         Block new_block(tx_id,feeString,weightString,parentString);
         allblocks.push_back(new_block); 
     }
-    ofstream outdata; 
-    outdata.open("sampleoutput.txt"); 
-    if(!outdata) {
-      cerr << "Error: file could not be opened" << endl;
-      exit(1);
-   }
-   int no_of_valid_blocks = 0;
+    myFileStream.close();
+    int no_of_valid_blocks = 0;
    
     for(int i=0;i<allblocks.size();i++){
         if(!mp[allblocks[i].tx_id]){
@@ -124,22 +120,12 @@ int main(){
                 if(mp[allblocks[i].parents[j]] > 0)
                     mp[allblocks[i].parents[j]]--;
             }
-            //allblocks.erase(i);
             continue;
         }
 
         if(allblocks[i].isValid == true){
-        no_of_valid_blocks++;
-        /*outdata << "ID" << i+1 << ": " << allblocks[i].tx_id << " Fee: " << allblocks[i].fee << " Weight: " << allblocks[i].weight;
-        outdata << " Parents: ";
-        
-        int temp = allblocks[i].no_of_parents;
-        int k=0;
-        while(temp--){
-            outdata << allblocks[i].parents[k] << " ";
-            k++;
-        }
-        outdata << endl;*/
+            no_of_valid_blocks++;
+            allblocks[i].no = i+1;
         }
     }
     sort(allblocks.begin(), allblocks.end(), 
@@ -153,6 +139,9 @@ int main(){
     int last_weight = 0;
     int last_fee = 0;
     long long curr_fees = 0;
+
+    vector<Block> outputBlocks;
+
     for(int i=0;i<allblocks.size() && curr_weight<allowed_weight;i++){
         if(allblocks[i].isValid == false){
             continue;
@@ -161,7 +150,27 @@ int main(){
         last_weight = allblocks[i].weight;
         curr_weight+=allblocks[i].weight;
         curr_fees += allblocks[i].fee;
-        outdata << "ID" << i+1 << ": " << allblocks[i].tx_id << " Fee: " << allblocks[i].fee << " Weight: " << allblocks[i].weight;
+        outputBlocks.push_back(allblocks[i]);
+    }
+
+    bool removelast = false;
+    if(curr_weight>allowed_weight){
+        curr_weight-= last_weight;
+        curr_fees -=  last_fee;
+        removelast = true;
+    }
+    int n = outputBlocks.size();
+    if(removelast == true){
+        n = outputBlocks.size()-1;
+    }
+    ofstream outdata; 
+    outdata.open("output.txt"); 
+    if(!outdata) {
+      cerr << "Sorry! Could not open the output file" << endl;
+      exit(1);
+    }
+    for(int i=0;i<n;i++){
+    outdata << "ID" << i+1 << ": " << allblocks[i].tx_id << " Fee: " << allblocks[i].fee << " Weight: " << allblocks[i].weight;
         outdata << " Parents: " << allblocks[i].no_of_parents << " ";
         int temp = allblocks[i].no_of_parents;
         int k=0;
@@ -171,39 +180,10 @@ int main(){
         }
         outdata << endl;
     }
-    bool removelast = false;
-    if(curr_weight>allowed_weight){
-        curr_weight-= last_weight;
-        curr_fees -=  last_fee;
-        removelast = true;
-    }
-
-    if(removelast == true){
-        string line; 
-        vector<string> lines;
-        std::ifstream inputStream("sampleoutput.txt");
-
-        while (getline(inputStream,line)) {
-            lines.push_back(line);
-        }
-        inputStream.close();
-
-        std::fstream outputStream("output.txt", ios::out | ios::trunc);
-        if (outputStream.is_open())
-        {
-            for (int i=0; i < lines.size()-1; i++) {
-                outputStream << lines[i] << "\n";
-            }
-        outputStream.close();
-        }
-    }
-
+    cout << "Operation Performed Successfully\n";
     cout << "Total weight of valid blocks: "<< curr_weight << "\n";
     cout << "Total fee profit possible: " << curr_fees << "\n";
-    cout << "Operation Performed Successfully\n";
-    cout << no_of_valid_blocks << " are valid out of 5214\n";
+    //cout << no_of_valid_blocks << " are valid out of 5214\n";
     outdata.close();
-    myFileStream.close();
-
     return 0;
 }
