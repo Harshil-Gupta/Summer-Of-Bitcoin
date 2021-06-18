@@ -12,6 +12,6 @@
 
 ##
 
-**Source of a code snippet tthat I did not write myself**
+**Source of a code snippet that I did not write myself**
 - https://stackoverflow.com/questions/1380463/sorting-a-vector-of-custom-objects
 
