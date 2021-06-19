@@ -161,10 +161,14 @@ int main(){
     }
 
     bool removelast = false;
-    if(curr_weight>allowed_weight){
+    if(curr_weight<allowed_weight){
         curr_weight-= last_weight;
         curr_fees -=  last_fee;
         removelast = true;
+    }
+
+    if(removelast == true){
+        outputBlocks.pop_back();
     }
 
     // Sorting all blocks in increasing order of weight
@@ -195,6 +199,9 @@ int main(){
         curr_fees -=  last_fee;
         removelast = true;
     }
+    if(removelast == true){
+        outputBlocks.pop_back();
+    }
 
     // Sorting all blocks in order of their appearance in mempool.csv
 
@@ -204,10 +211,6 @@ int main(){
             return block1.block_id < block2.block_id;
         }
     );
-    int n = outputBlocks.size();
-    if(removelast == true){
-        n = outputBlocks.size()-1; // So that last block will not be included
-    }
 
     ofstream outdata; 
     outdata.open("block.txt"); 
@@ -215,13 +218,12 @@ int main(){
       cerr << "Sorry! Could not open the output file" << endl;
       exit(1);
     }
-    for(int i=0;i<n;i++){
-        outdata << allblocks[i].tx_id << endl; // Storing data in block.txt
+    for(int i=0;i<outputBlocks.size();i++){
+        outdata << outputBlocks[i].tx_id << endl;
     }
     cout << "Operation Performed Successfully\n";
     cout << "Total weight of valid blocks: "<< curr_weight << "\n";
     cout << "Total fee profit possible: " << curr_fees << "\n";
-    //cout << no_of_valid_blocks << " are valid out of 5214\n";
     outdata.close();
     return 0;
 }
