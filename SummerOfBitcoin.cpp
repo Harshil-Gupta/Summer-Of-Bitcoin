@@ -205,7 +205,7 @@ int main(){
 
     // Sorting all blocks in order of their appearance in mempool.csv
 
-    sort(allblocks.begin(), allblocks.end(), 
+    sort(outputBlocks.begin(), outputBlocks.end(), 
         [] (const Block& block1, const Block& block2)
         {
             return block1.block_id < block2.block_id;
